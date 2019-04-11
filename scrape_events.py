@@ -3,7 +3,8 @@ import re
 from bs4 import BeautifulSoup as BS
 import csv
 
-years = range(1970, 2020)
+#have to skip these years because they are not in parsable format
+years = list(range(1970, 2000)) + list(range(2001, 2007)) + list(range(2010, 2020))
 
 months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
@@ -11,6 +12,7 @@ six_month_ranges = ["January-June", "July-December"]
 # 1980 2000
 wierd_years = list(range(1980, 2001))
 wierd_years = wierd_years + [2003, 2004, 2006, 2007, 2009, 2010]
+no_type_years = [2000, 2003, 2004, 2007, 2008, 2009]
 
 def process_data(processable_data, year, month):
     """
@@ -28,6 +30,16 @@ def process_data(processable_data, year, month):
                 location, #location
                 details, #details
                 processable_data[i][4]
+            ]
+        if year in no_type_years:
+            processable_data[i] = [
+                processable_data[i][0], #date
+                "Unknown", #type
+                processable_data[i][1], #dead
+                processable_data[i][2], #injured
+                processable_data[i][3], #location
+                processable_data[i][4], #details
+                processable_data[i][5] if year != 2000 else "Unknown", #perpetrators
             ]
         if month != None:
             # print(processable_data[i][0])
