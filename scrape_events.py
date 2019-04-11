@@ -8,17 +8,20 @@ years = range(1970, 2020)
 months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 six_month_ranges = ["January-June", "July-December"]
+# 1980 2000
+wierd_years = list(range(1980, 2001))
+wierd_years = wierd_years + [2003, 2004, 2006, 2007, 2009, 2010]
 
 def process_data(processable_data, year, month):
     """
         Adds contextual information to each row
     """
     for i in range(0, len(processable_data)):
-        if year == 1984:
+        if year == 1984 or year == 2006:
             location_and_details = processable_data[i][3]
             location, details = location_and_details.split(': ')
             processable_data[i] = [
-                f"{processable_data[i][0]} {year}", #date
+                processable_data[i][0], #date
                 "Unknown", #type
                 processable_data[i][1], #dead
                 processable_data[i][2], #injured
@@ -57,6 +60,8 @@ def scrape_page(url, year, month):
             # print(i)
             if month == "January-June" or month == None:
                 process_data(new_processable_data, year, months[i])
+            elif month == 'included':
+                process_data(new_processable_data, year, None)
             elif month != None:
                 process_data(new_processable_data, year, months[i + 6])
 
@@ -67,7 +72,7 @@ def scrape_page(url, year, month):
         rows = table.findAll('tr')
         processable_data = [[td.text.strip() for td in tr.findAll('td')] for tr in rows]
         processable_data =processable_data[1:len(processable_data)]
-        process_data(processable_data, year, month)
+        process_data(processable_data, year, None if month == 'included' else month)
         # remove the header row
         return processable_data
 
@@ -86,6 +91,9 @@ for year in years:
         for month_range in six_month_ranges:
             print(f"Processing: {month_range} {year}")
             data = data + scrape_page(f"https://en.wikipedia.org/wiki/List_of_terrorist_incidents_in_{month_range}_{year}", year, month_range)
+    elif year in wierd_years:
+        print(f"Processing: {year}, wierd year")
+        data = data + scrape_page(f"https://en.wikipedia.org/wiki/List_of_terrorist_incidents_in_{year}", year, 'included')
     else:
         print(f"Processing: {year}")
         data = data + scrape_page(f"https://en.wikipedia.org/wiki/List_of_terrorist_incidents_in_{year}", year, None)
