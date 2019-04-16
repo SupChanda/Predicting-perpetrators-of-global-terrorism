@@ -59,11 +59,11 @@ def fix_date(row):
 def parse_out_numbers(text):
     if not isinstance(text, str):
         return 0
-    matches = re.findall("[0-9]+", text)
+    matches = re.findall("\d{0,3},\d+|\d+", text)
     if len(matches) > 1:
         sum = 0
         for match in matches:
-            sum += int(match)
+            sum += int(match.replace(",", ""))
         return sum
     if len(matches) == 0:
         if "Dozens" in text:
@@ -72,7 +72,40 @@ def parse_out_numbers(text):
             return 3
         return 0
 
-    return int(matches[0])
+    return int(matches[0].replace(",", ""))
+
+def fix_type(row):
+    if not isinstance(row.type, str):
+        row.type = "unknown"
+        return
+    type = row.type.lower()
+    if "bomb" in type or "grenade" in type or "rocket" in type or "mortar" in type or "explosi" in type or "artillery" in type or "rpg" in type or "air" in type or "drone" in type or "missile" in type or "mine" in type:
+        row.type = "bombing"
+    elif "shoot" in type or "gun" in type or "sniper" in type or "shot" in type or "raid" in type or "armed" in type or "firefight" in type or "firing" in type:
+        row.type = "shooting"
+    elif "stab" in type or "machete" in type:
+        row.type = "stabbing"
+    elif "assassination" in type:
+        row.type = "assassination"
+    elif "massacre" in type:
+        row.type = "massacre"
+    elif "arson" in type:
+        row.type = "arson"
+    elif "kidnap" in type or "abduct" in type or "hostage" in type:
+        row.type = "hostage"
+    elif "bio" in type:
+        row.type = "bioattack"
+    elif "hijack" in type or "car" in type or "vehicle" in type:
+        row.type = "hijacking"
+    elif "melee" in type:
+        row.type = "melee"
+    elif "unknown" in type:
+        row.type = "unknown"
+    else:
+        row.type = "other_violence"
+
+
+
 
 def fix_dead_and_injured(row):
     row.dead = parse_out_numbers(row.dead)
@@ -81,6 +114,7 @@ def fix_dead_and_injured(row):
 for i, row in data.iterrows():
     fix_date(row)
     fix_dead_and_injured(row)
+    fix_type(row)
 
 # fix_date(data.iloc[0])
 print(data.head())
